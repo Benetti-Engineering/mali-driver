@@ -80,6 +80,18 @@
 #define u64_to_user_ptr(x) ((void __user *)(uintptr_t)x)
 #endif
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+static inline int del_timer(struct timer_list *timer)
+{
+	return timer_delete(timer);
+}
+
+static inline int del_timer_sync(struct timer_list *timer)
+{
+	return timer_delete_sync(timer);
+}
+#endif
+
 /*
  * Kernel-side Base (KBase) APIs
  */

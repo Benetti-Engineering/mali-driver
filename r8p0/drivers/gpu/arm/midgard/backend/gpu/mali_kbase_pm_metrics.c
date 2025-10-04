@@ -90,9 +90,15 @@ int kbasep_pm_metrics_init(struct kbase_device *kbdev)
 
 #ifdef CONFIG_MALI_MIDGARD_DVFS
 	kbdev->pm.backend.metrics.timer_active = true;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+	hrtimer_setup(&kbdev->pm.backend.metrics.timer, dvfs_callback,
+		      CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+#else
 	hrtimer_init(&kbdev->pm.backend.metrics.timer, CLOCK_MONOTONIC,
 							HRTIMER_MODE_REL);
 	kbdev->pm.backend.metrics.timer.function = dvfs_callback;
+#endif
 
 	hrtimer_start(&kbdev->pm.backend.metrics.timer,
 			HR_TIMER_DELAY_MSEC(kbdev->pm.dvfs_period),

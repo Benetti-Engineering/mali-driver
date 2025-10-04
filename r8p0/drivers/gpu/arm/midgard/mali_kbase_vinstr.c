@@ -1191,9 +1191,14 @@ static int kbasep_vinstr_service_task(void *data)
 		return -ENOMEM;
 	}
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+	hrtimer_setup(&timer->hrtimer, kbasep_vinstr_wake_up_callback,
+		      CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+#else
 	hrtimer_init(&timer->hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 
 	timer->hrtimer.function = kbasep_vinstr_wake_up_callback;
+#endif
 	timer->vinstr_ctx       = vinstr_ctx;
 
 	while (!kthread_should_stop()) {

@@ -294,10 +294,16 @@ int kbase_pm_policy_init(struct kbase_device *kbdev)
 	kbdev->pm.backend.gpu_poweroff_wq = wq;
 	INIT_WORK(&kbdev->pm.backend.gpu_poweroff_work,
 			kbasep_pm_do_gpu_poweroff_wq);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+	hrtimer_setup(&kbdev->pm.backend.gpu_poweroff_timer,
+		      kbasep_pm_do_gpu_poweroff_callback, CLOCK_MONOTONIC,
+		      HRTIMER_MODE_REL);
+#else
 	hrtimer_init(&kbdev->pm.backend.gpu_poweroff_timer,
 			CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	kbdev->pm.backend.gpu_poweroff_timer.function =
 			kbasep_pm_do_gpu_poweroff_callback;
+#endif
 	kbdev->pm.backend.pm_current_policy = policy_list[0];
 	kbdev->pm.backend.pm_current_policy->init(kbdev);
 	kbdev->pm.gpu_poweroff_time =

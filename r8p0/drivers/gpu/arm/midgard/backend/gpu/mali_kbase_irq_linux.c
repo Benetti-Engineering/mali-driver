@@ -332,10 +332,16 @@ static int kbasep_common_test_interrupt(
 			err = -EINVAL;
 		} else {
 			kbasep_irq_test_data.timeout = 0;
-			hrtimer_init(&kbasep_irq_test_data.timer,
-					CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-			kbasep_irq_test_data.timer.function =
-						kbasep_test_interrupt_timeout;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+	hrtimer_setup(&kbasep_irq_test_data.timer,
+		      kbasep_test_interrupt_timeout, CLOCK_MONOTONIC,
+		      HRTIMER_MODE_REL);
+#else
+	hrtimer_init(&kbasep_irq_test_data.timer,
+		     CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	kbasep_irq_test_data.timer.function = kbasep_test_interrupt_timeout;
+#endif
 
 			/* trigger interrupt */
 			kbase_reg_write(kbdev, mask_offset, 0x1, NULL);

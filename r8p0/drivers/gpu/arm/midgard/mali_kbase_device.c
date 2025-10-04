@@ -98,9 +98,14 @@ static int kbase_device_as_init(struct kbase_device *kbdev, int i)
 		KBASE_DEBUG_ASSERT(!object_is_on_stack(poke_work));
 		INIT_WORK(poke_work, kbasep_as_do_poke);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 15, 0))
+		hrtimer_setup(poke_timer, kbasep_as_poke_timer_callback,
+			      CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+#else
 		hrtimer_init(poke_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 
 		poke_timer->function = kbasep_as_poke_timer_callback;
+#endif
 
 		kbdev->as[i].poke_refcount = 0;
 		kbdev->as[i].poke_state = 0u;

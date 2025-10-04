@@ -55,6 +55,7 @@ kbase_fence_enable_signaling(struct dma_fence *fence)
 	return true;
 }
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 15, 0))
 static void
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))
 kbase_fence_fence_value_str(struct fence *fence, char *str, int size)
@@ -64,6 +65,7 @@ kbase_fence_fence_value_str(struct dma_fence *fence, char *str, int size)
 {
 	snprintf(str, size, "%llu", fence->seqno);
 }
+#endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))
 const struct fence_ops kbase_fence_ops = {
@@ -75,7 +77,9 @@ const struct dma_fence_ops kbase_fence_ops = {
 	.get_driver_name = kbase_fence_get_driver_name,
 	.get_timeline_name = kbase_fence_get_timeline_name,
 	.enable_signaling = kbase_fence_enable_signaling,
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 15, 0))
 	.fence_value_str = kbase_fence_fence_value_str
+#endif
 };
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 10, 0))
